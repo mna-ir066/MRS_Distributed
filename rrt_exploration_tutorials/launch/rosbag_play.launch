@@ -1,0 +1,65 @@
+<!-- 
+
+This launch files plays back the two regions of the test Map file. One bag file contains the upper region and the other contains the lower region.
+
+USAGE: roslaunch rrt_exploration_tutorials rosbag_play.launch playrate:=0.5 
+
+(where play rate is the FACTOR to which the baseline 20Hz is applied.
+
+FACTOR	RATE
+1	20Hz
+0.5	10Hz
+0.05	1Hz
+0.025   0.5Hz
+0.005	0.1Hz
+0.0005	0.01Hz
+
+REMAP: CHANGE THE REMAP OF MAP MERGE TO FIT TEST CONDITION. /map_merge/map:=/map_merge/map_upper to eg. /map_merge/map:=/robot_1/map"
+
+_3/map > outputfile_lower.txt"> </node>
+ > outputfile_upper.txt
+
+
+ -->
+
+<launch>
+
+<arg name="rate" default="1" />
+<arg name="freq" value="$(eval 20 * arg('rate'))" />
+
+<arg name="map_file_path_orig" default="/home/rmc/ThesisResults/TestFiles/Map20Hz/" />
+<arg name="record_file_path" default="/home/rmc/ThesisResults/RecordResults/" />
+<arg name="map_file_path" default="/home/rmc/ThesisResults/TestFiles/Map20Hz_NewMapRun2/" />
+<arg name="map_file_upper" default="Map20Hz_UpperRegion" />
+<arg name="map_file_lower" default="Map20Hz_LowerRegion" />
+
+<!-- --> 
+
+<node pkg="rosbag" type="play" name="rosbag_play_upper" args="-r $(arg rate) $(arg map_file_path)$(arg map_file_upper).bag /map_merge/map:=/robot_1/map"> </node>
+
+<node pkg="rosbag" type="play" name="rosbag_play_lower" args="-r $(arg rate) $(arg map_file_path)$(arg map_file_lower).bag /map_merge/map:=/robot_3/map"> </node>
+
+
+
+<node pkg="rosbag" type="record" name="rosbag_record_mapmerge" args="record -o $(arg record_file_path)map_merge_at_$(arg freq)Hz /map_merge/map">  </node>
+
+
+
+<!--
+
+
+<node pkg="rosbag" type="record" name="rosbag_record_mapmerge" args="record -o $(arg test_file_path)map_merge_testfile_upper /map_merge/map">  </node>
+
+ 
+
+<node pkg="rostopic" type="rostopic" name="freq_output_upper" args="hz /robot_1/map"> </node>
+
+<node pkg="rostopic" type="rostopic" name="freq_output_lower" args="hz /robot_3/map"> </node>
+
+-->
+
+
+
+
+</launch>
+

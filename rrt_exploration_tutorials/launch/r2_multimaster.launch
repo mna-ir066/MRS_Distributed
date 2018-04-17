@@ -1,0 +1,75 @@
+<!-- Multimaster.launch does the following:
+
+1. Runs the multimaster discovery node
+2. Runs the multimaster sync node
+2.1 syncs the merged map from each robot to "relay nodes" 
+2.2.all robots receive relay nodes from each other
+3. Remaps the received relay node to robot_X/map topic for map_merge to compute
+
+Edits:
+Mar 30 - Created and started source control.
+Apr 2 - TEST VERSION- NOT ORIGINGAL 
+
+
+<rosparam param="ignore_nodes"> ['/map_merge/map','/gazebo', '/rviz', '/assigner', '/filter', '/global_detector', '/local_detector'] </rosparam>
+    <rosparam param="ignore_topics"> ['/map_merge/map'] </rosparam>
+ 
+    <rosparam param="ignore_nodes"> ['*'] </rosparam>
+    <rosparam param="ignore_topics"> ['*'] </rosparam>
+
+ -->
+
+<launch>
+
+
+<!-- This argument will change for the different robots that we have. Mainly to deconflict topics -->
+  <arg name="relay_name" default="relay_x" />
+  <arg name="robot_name_2" default="robot_2" />
+  <arg name="robot_name_3" default="robot_3" />
+
+
+  <node name="master_discovery" pkg="master_discovery_fkie" type="master_discovery" output="screen"> </node>
+
+  <node name="master_sync" pkg="master_sync_fkie" type="master_sync" output="screen">
+    <rosparam param="ignore_nodes"> ['/assigner','/filter', '/gazebo', '/global_detector', '/local_detector', '/map_merge/map_merge2', '/robot2_to_robot1', '/robot3_to_robot1', '/robot_2/move_base_node', '/robot_2/robot_state_publisher', '/robot_2/slam_gmapping', '/rviz'] </rosparam>
+    
+<rosparam param="sync_topics"> ['/robot_1/map','/robot_2/map','/robot_3/map', '/robot_1/map_merge','/robot_2/map_merge','/robot_3/map_merge'] </rosparam>
+ 
+ </node>
+
+
+
+
+
+<!-- Launch the relay node e.g. relay mep_merge to relay/map 
+
+  <node pkg="topic_tools" type="relay" name="robot_relay2" args="/map_merge/map /robot_2/map_merge" />
+
+  -->
+
+
+</launch>
+
+
+
+
+
+<!-- rostopic pub my_topic std_msgs/String "hello there" -->
+
+<!-- rostopic pub my_topic std_msgs/String "hello there" 
+rosrun topic_tools relay /merged_map /robot0/shared_topic
+
+
+rostopic pub /map_merge/map std_msgs/String "Sending map data from robot 1"
+rostopic pub /robot_6/map std_msgs/String "Sending map data from robot 3-1"
+-->
+
+<!--
+relay <intopic> [outtopic]
+    Subscribe to <intopic> and republish to another topic.
+        intopic: Incoming topic to subscribe to
+        outtopic: Outgoing topic to publish on (default: intopic_relay) 
+    e.g. rename base_scan to my_base_scan:
+    rosrun topic_tools relay base_scan my_base_scan
+-->
+
